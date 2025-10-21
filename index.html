@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Math Game</title>
+  <title>Math Game K–12</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,6 +13,11 @@
     h1 {
       margin-bottom: 10px;
     }
+    select, input, button {
+      font-size: 16px;
+      padding: 8px;
+      margin: 5px;
+    }
     #currency {
       font-size: 18px;
       margin-bottom: 10px;
@@ -21,15 +25,6 @@
     #problem {
       font-size: 24px;
       margin: 20px 0;
-    }
-    input {
-      padding: 10px;
-      font-size: 16px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 10px;
     }
     #feedback {
       margin-top: 20px;
@@ -47,45 +42,113 @@
   </style>
 </head>
 <body>
-  <h1>Math Game 🧠💰</h1>
+  <h1>Math Game 🎓 K–12</h1>
   <div id="currency">Coins: 0</div>
+
+  <label for="grade">Select Grade Level:</label>
+  <select id="grade" onchange="updateTopics()">
+    <option value="k">Kindergarten</option>
+    ${[...Array(12)].map((_, i) => `<option value="${i+1}">${i+1}th Grade</option>`).join('')}
+  </select>
+
+  <label for="topic">Select Topic:</label>
+  <select id="topic"></select>
+
   <div id="problem"></div>
   <input type="number" id="answer" placeholder="Your answer" />
   <button onclick="checkAnswer()">Submit</button>
   <div id="feedback"></div>
+
   <a href="shop.html">🛍️ Visit the Shop</a>
 
   <script>
+    const topicsByGrade = {
+      k: ["Addition (1–10)", "Subtraction (1–10)", "Easy Division (1–5)"],
+      1: ["Addition (1–20)", "Subtraction (1–20)", "Counting"],
+      2: ["Addition (2-digit)", "Subtraction (2-digit)", "Intro to Multiplication"],
+      3: ["Multiplication (1–10)", "Division (1–10)", "Word Problems"],
+      4: ["Fractions (basic)", "Long Division", "Measurement"],
+      5: ["Fractions (add/subtract)", "Decimals (tenths)", "Estimation"],
+      6: ["Ratios", "Percentages", "Negative Numbers"],
+      7: ["Expressions & Equations", "Inequalities", "Geometry"],
+      8: ["Linear Equations", "Exponents", "Pythagorean Theorem"],
+      9: ["Quadratics", "Functions", "Coordinate Geometry"],
+      10: ["Polynomials", "Trigonometry", "Systems of Equations"],
+      11: ["Statistics", "Probability", "Advanced Algebra"],
+      12: ["Calculus", "Limits", "Derivatives"]
+    };
+
     let coins = parseInt(localStorage.getItem("coins")) || 0;
-    let currentAnswer = 0;
     let powerUps = JSON.parse(localStorage.getItem("powerUps")) || { x2: false };
+    let currentAnswer = 0;
+
+    function updateTopics() {
+      const grade = document.getElementById("grade").value;
+      const topicSelect = document.getElementById("topic");
+      topicSelect.innerHTML = "";
+
+      (topicsByGrade[grade] || []).forEach(topic => {
+        const option = document.createElement("option");
+        option.value = topic.toLowerCase().replace(/[^a-z0-9]/g, "_");
+        option.textContent = topic;
+        topicSelect.appendChild(option);
+      });
+
+      generateProblem();
+    }
+
+    function getReward(grade) {
+      if (grade === "k") return 10;
+      return 10 + parseInt(grade) * 20;
+    }
 
     function generateProblem() {
-      const a = Math.floor(Math.random() * 10) + 1;
-      const b = Math.floor(Math.random() * 10) + 1;
-      currentAnswer = a + b;
-      document.getElementById("problem").textContent = `What is ${a} + ${b}?`;
+      const grade = document.getElementById("grade").value;
+      const topic = document.getElementById("topic").value;
+      let a, b, operator;
+
+      // Example stubs — expand these!
+      if (grade === "k" && topic === "addition_1_10") {
+        a = Math.floor(Math.random() * 10) + 1;
+        b = Math.floor(Math.random() * 10) + 1;
+        currentAnswer = a + b;
+        operator = "+";
+        document.getElementById("problem").textContent = `What is ${a} ${operator} ${b}?`;
+      } else if (grade === "7" && topic === "expressions___equations") {
+        a = Math.floor(Math.random() * 10) + 1;
+        b = Math.floor(Math.random() * 10) + 1;
+        currentAnswer = b;
+        document.getElementById("problem").textContent = `Solve for x: ${a}x = ${a * b}`;
+      } else {
+        document.getElementById("problem").textContent = "Topic not implemented yet.";
+        currentAnswer = null;
+      }
+
       document.getElementById("answer").value = "";
       document.getElementById("feedback").textContent = "";
     }
 
     function checkAnswer() {
       const userAnswer = parseInt(document.getElementById("answer").value);
+      const grade = document.getElementById("grade").value;
+
       if (userAnswer === currentAnswer) {
-        let reward = powerUps.x2 ? 20 : 10;
+        let reward = getReward(grade);
+        if (powerUps.x2) reward *= 2;
         coins += reward;
         localStorage.setItem("coins", coins);
         document.getElementById("feedback").textContent = `Correct! +${reward} coins 🎉`;
       } else {
         document.getElementById("feedback").textContent = "Oops! Try again.";
       }
+
       document.getElementById("currency").textContent = `Coins: ${coins}`;
       generateProblem();
     }
 
     window.onload = () => {
       document.getElementById("currency").textContent = `Coins: ${coins}`;
-      generateProblem();
+      updateTopics();
     };
   </script>
 </body>
