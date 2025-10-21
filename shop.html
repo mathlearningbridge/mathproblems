@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Math Game Shop</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>🛍️ Math Game Shop</h1>
+  <div id="currency">Coins: 0</div>
+
+  <div class="shop-item">
+    <h3>x2 Money 💸</h3>
+    <p>Cost: 100 coins</p>
+    <button onclick="buyX2()">Buy</button>
+  </div>
+
+  <a href="index.html">← Back to Game</a>
+
+  <script>
+    let coins = parseInt(localStorage.getItem("coins")) || 0;
+    let powerUps = JSON.parse(localStorage.getItem("powerUps")) || { x2: false };
+
+    document.getElementById("currency").textContent = `Coins: ${coins}`;
+
+    function buyX2() {
+      if (powerUps.x2) {
+        alert("You already own x2 Money!");
+        return;
+      }
+      if (coins >= 100) {
+        coins -= 100;
+        powerUps.x2 = true;
+        localStorage.setItem("coins", coins);
+        localStorage.setItem("powerUps", JSON.stringify(powerUps));
+        alert("Purchased x2 Money! 🎉");
+        document.getElementById("currency").textContent = `Coins: ${coins}`;
+      } else {
+        alert("Not enough coins!");
+      }
+    }
+  </script>
+</body>
+</html>
